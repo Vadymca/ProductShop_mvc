@@ -1,0 +1,43 @@
+﻿@model IEnumerable<mvc_app.Models.Product>
+
+@{
+    Layout = "_Layout";
+}
+<form asp-action="Index" method="get" class="form-inline mb-3">
+    <div class="input-group">
+        <input type="text" name="searchString" class="form-control" placeholder="Search for products..." value="@ViewData["SearchString"]" />
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="submit">Search</button>
+        </div>
+    </div>
+</form>
+
+<p>
+    <a href="@Url.Action("Create")" class="btn btn-primary">Create New Product</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Price</th>
+            <th scope="col">Description</th>
+            <th scope="col">Tools</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model)
+        {
+            <tr>
+                <td>@product.Name</td>
+                <td>@product.Price</td>
+                <td>@product.Description</td>
+                <td>
+                    <a href="@Url.Action("Update", new { id = product.Id })" class="btn btn-warning">Update</a>
+                    <a href="@Url.Action("Details", new { id = product.Id })" class="btn btn-info">Details</a>
+                    <a href="@Url.Action("Delete", new { id = product.Id })" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
