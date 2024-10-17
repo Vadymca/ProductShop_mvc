@@ -3,6 +3,7 @@
 
 @{
     Layout = "_Layout";
+    ViewData["Title"] = "Home";
 }
 
 <div class="container mt-5">
@@ -21,7 +22,7 @@
         <div class="text-center">
             <img src="/img/main.png" class="img-fluid rounded mx-auto d-block mb-4" alt="Main Image" style="max-width: 500px;" />
             <h2 class="text-muted">Welcome! Please log in to continue.</h2>
-            <a href="@Url.Action("Login", "User")" class="btn btn-primary btn-lg mt-3">Login</a>
+            <a href="@Url.Action("Auth", "User")" class="btn btn-primary btn-lg mt-3">Login</a>
         </div>
     }
 </div>

@@ -2,12 +2,13 @@
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
 	Layout = "_Layout";
+    ViewData["Title"] = "Delete";
 }
 
 <form asp-action="Delete" method="post">
     @Html.AntiForgeryToken()
     <div>
-        <h4>Are you sure you want to delete this customer?</h4>
+        <h4>Are you sure you want to delete this product?</h4>
         <hr />
         <dl class="row">
             <dt class="col-sm-2">Name</dt>

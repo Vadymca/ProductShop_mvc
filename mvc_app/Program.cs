@@ -9,7 +9,7 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         //Add service products
-        builder.Services.AddSingleton<IServiceProducts, ServiceProducts>();
+        builder.Services.AddScoped<IServiceProducts, ServiceProducts>();
         builder.Services.AddDbContext<ProductContext>(options =>
         {
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -22,15 +22,21 @@ public class Program
         builder.Services.AddDefaultIdentity<IdentityUser>(options =>
         {
             //confirmed email
-        options.SignIn.RequireConfirmedEmail = true;
-        options.Password.RequireDigit = false;
-        options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequiredLength = 4;
-        options.Password.RequireLowercase = false;
-        options.Password.RequireUppercase = false;
-        options.Password.RequiredUniqueChars = 0;
-            }).AddEntityFrameworkStores<UserContext>();
+            options.SignIn.RequireConfirmedEmail = true;
+            options.Password.RequireDigit = false;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequiredLength = 4;
+            options.Password.RequireLowercase = false;
+            options.Password.RequireUppercase = false;
+            options.Password.RequiredUniqueChars = 0;
+        })
+            .AddRoles<IdentityRole>()
+            .AddEntityFrameworkStores<UserContext>();
         builder.Services.AddControllersWithViews();
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy("admin", policy => policy.RequireRole("admin"));
+        });
         var app = builder.Build();
 
         //identity

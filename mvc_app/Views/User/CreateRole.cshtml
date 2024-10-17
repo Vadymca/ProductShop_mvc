@@ -1,0 +1,21 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Create Role";
+}
+
+<h3 class="text-center">Create Role</h3>
+
+<div class="container">
+    <form asp-action="CreateRole" method="post" class="mt-4">
+        <div class="form-group">
+            <label for="roleName">roleName:</label>
+            <input type="text" id="roleName" name="roleName" class="form-control" required />
+        </div>
+
+  
+        <button type="submit" class="btn btn-primary btn-block">Create</button>
+    </form>
+</div>
+

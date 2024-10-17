@@ -1,14 +1,26 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using System.Data;
 
 public class UserController : Controller
 {
     private readonly UserManager<IdentityUser> _userManager;
     private readonly SignInManager<IdentityUser> _signInManager;
-    public UserController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
+    private readonly RoleManager<IdentityRole> _roleManager;
+    public UserController(
+        UserManager<IdentityUser> userManager, 
+        SignInManager<IdentityUser> signInManager, 
+        RoleManager<IdentityRole> roleManager)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _roleManager = roleManager;
+    }
+    [HttpGet]
+    public ViewResult CreateRole()
+    {
+        return View();
     }
     [HttpGet]
     public IActionResult Register()
@@ -31,7 +43,8 @@ public class UserController : Controller
         var result = await _userManager.CreateAsync(user, password);
         if (result.Succeeded)
         {
-            return Ok("User is register");
+            return RedirectToAction("Index", "Home");
+            //return Ok("User is register");
         }
         foreach (var item in result.Errors)
         {
@@ -71,4 +84,54 @@ public class UserController : Controller
         await _signInManager.SignOutAsync();
 		return RedirectToAction("Index", "Home");
 	}
+    [HttpPost]
+    public async Task<IActionResult> CreateRole(string roleName)
+    {
+        if (string.IsNullOrEmpty(roleName))
+        {
+            return BadRequest("The role name is important ...");
+        }
+        var roleExists = await _roleManager.RoleExistsAsync(roleName);
+        if(roleExists)
+        {
+            return BadRequest($"The role {roleName} is already exists ...");
+        }
+        var role = new IdentityRole { Name = roleName };
+        var result = await _roleManager.CreateAsync(role);
+        if (result.Succeeded)
+        {
+            return RedirectToAction("Index", "Home");
+            //return Ok("Auth Ok");
+        }
+        return BadRequest(Json(result.Errors));
+    }
+    [HttpGet]
+    public ViewResult AssignRole()
+    {
+        return View();
+    }
+    [HttpPost]
+    public async Task<IActionResult> AssignRole(string userId, string roleName)
+    {
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(roleName))
+        {
+            return BadRequest("userId or roleName are important ...");
+        }
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return NotFound("The User not found...");
+        }
+        var roleExists = await _roleManager.RoleExistsAsync(roleName);
+        if (!roleExists)
+        {
+            return BadRequest($"The role {roleName} is already exists ...");
+        }
+        var result = await _userManager.AddToRoleAsync(user, roleName);
+        if (result.Succeeded)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+        return BadRequest(Json(result.Errors));
+    }
 }
