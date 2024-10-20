@@ -2,23 +2,13 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using mvc_app.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 namespace mvc_app.Controllers
 {
-    public class RegisterModel
-    {
-        public string Email { get; set; }
-        public string Password { get; set; }
-    }
-    public class AuthModel
-    {
-        public string Email { get; set; }
-        public string Password { get; set; }
-    }
-
     [Route("api/[controller]")]
     [ApiController]
     public class APIUserController : ControllerBase
@@ -37,7 +27,7 @@ namespace mvc_app.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterModel model)
+        public async Task<IActionResult> Register([FromBody] ApiUserModel model)
         {
 
             if (string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Password))
@@ -63,7 +53,7 @@ namespace mvc_app.Controllers
             return BadRequest(result.Errors);
         }
         [HttpPost("auth")]
-        public async Task<IActionResult> Auth([FromBody] AuthModel model)
+        public async Task<IActionResult> Auth([FromBody] ApiUserModel model)
         {
             if (string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Password))
             {
