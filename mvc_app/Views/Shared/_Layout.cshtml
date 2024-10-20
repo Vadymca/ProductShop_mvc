@@ -27,14 +27,32 @@
                 </ul>
                 <ul class="navbar-nav me-2 mb-2 mb-lg-0">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            User
-                        </a>
 
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/user/register">Register</a></li>
-                            <li><a class="dropdown-item" href="/user/auth">Auth</a></li>
-                        </ul>
+                        @{
+                            if (User.Identity.IsAuthenticated)
+                            {
+                                <a class="nav-link active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            @User.Identity.Name
+                            </a>
+                            <li class="nav-item">
+                                <form asp-action="Logout" asp-controller="User" method="post" class="mt-6">
+                                    <button type="submit" class="btn btn-danger ">Logout</button>
+                                </form>
+
+                            </li>
+                            }
+                            else
+                            {
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Login
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="/user/register">Register</a></li>
+                                    <li><a class="dropdown-item" href="/user/auth">Auth</a></li>
+                                </ul>
+                            }
+                         }
+                       
                     </li>
                 </ul>
             </div>

@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using mvc_app.Models;
 using mvc_app.Services;
 
 namespace mvc_app.Controllers
 {
+
     public class ProductsController : Controller
     {
         private readonly IServiceProducts _serviceProducts;
@@ -17,7 +19,7 @@ namespace mvc_app.Controllers
         // GET: http://localhost:[port]/products
         public async Task<ViewResult> Index(string searchString)
         {
-            var products = _serviceProducts.Search(searchString);
+            var products = await _serviceProducts.SearchAsync(searchString);
             ViewData["SearchString"] = searchString;
             return View(products);
         }
@@ -46,7 +48,7 @@ namespace mvc_app.Controllers
             }
                return View(product);
         }
-        public ViewResult Update(int? id) => View();
+        public async Task<ViewResult> Update(int? id) => View();
         //POST: http://localhost:[port]/products/update/{id}
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -59,10 +61,10 @@ namespace mvc_app.Controllers
             }
             return View(product);
         }
-        public ViewResult Delete(int? id)
+        public async Task<ViewResult> Delete(int? id)
         {
-            var product = _productContext?.Products
-                .FirstOrDefault(x => x.Id == id);
+            var product = await _productContext.Products
+                .FirstOrDefaultAsync(x => x.Id == id);
             return View(product);
         }
         //POST: http://localhost:[port]/products/delete/{id}

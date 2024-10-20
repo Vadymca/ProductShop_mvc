@@ -38,7 +38,7 @@ namespace mvc_app.Controllers
 
         // Создание нового поста (доступно только авторизованным пользователям)
         [Authorize(Roles = "admin")]
-        [HttpPost]
+        [HttpPost("create")]
         public async Task<IActionResult> CreateProduct([FromBody] Product product)
         {
             var product_created = await _serviceProducts.CreateAsync(product);
@@ -46,7 +46,7 @@ namespace mvc_app.Controllers
         }
 
         [Authorize(Roles = "admin")]
-        [HttpPost]
+        [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateProduct(int id, [FromBody] Product product)
         {
             var product_updated = await _serviceProducts.UpdateAsync(id, product);

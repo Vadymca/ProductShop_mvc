@@ -10,7 +10,7 @@ namespace mvc_app.Services
         public Task<Product?> GetByIdAsync(int id);
         public Task<Product?> UpdateAsync(int id, Product? product);
         public Task<bool> DeleteAsync(int id);
-        public IEnumerable<Product> Search(string searchString);
+        Task<IEnumerable<Product>> SearchAsync(string searchString);
     }
     public class ServiceProducts : IServiceProducts
     {
@@ -21,15 +21,15 @@ namespace mvc_app.Services
             _productContext = productContext;
             _logger = logger;
         }
-        public IEnumerable<Product> Search(string searchString)
+        public async Task<IEnumerable<Product>> SearchAsync(string searchString)
         {
             if (string.IsNullOrEmpty(searchString))
             {
-                return _productContext.Products.ToList();
+                return await _productContext.Products.ToListAsync();
             }
-            return _productContext.Products
+            return await _productContext.Products
                 .Where(p => p.Name.Contains(searchString))
-                .ToList();
+                .ToListAsync();
         }
 
         public async Task<Product?> CreateAsync(Product? product)
