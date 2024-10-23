@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+<button id="getProducts">Get Products</button>
+
+<script>
+    $(document).ready(function() {
+        $('#getProducts').click(function() {
+            const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiI2NWJhMzdiMi00M2VkLTQyNDItYThlOS0yMWM0NTM1ZTE5ODIiLCJ1bmlxdWVfbmFtZSI6InZhZGltQGdtYWlsLmNvbSIsImVtYWlsIjoidmFkaW1AZ21haWwuY29tIiwibmJmIjoxNzI5NzAzODEwLCJleHAiOjE3Mjk3MDU2MTAsImlhdCI6MTcyOTcwMzgxMCwiaXNzIjoiaHR0cHM6Ly9sb2NhbGhvc3Q6NzE5MyIsImF1ZCI6Imh0dHBzOi8vbG9jYWxob3N0OjcxOTMifQ.w7ppJ-9lQZY34s0AZPEzLjuD72WNKRGbMGMmpvIIRjU";
+
+            $.ajax({
+                url: 'https://localhost:7193/api/APIProducts',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token 
+                },
+                success: function(data) {
+                    console.log('Success:', data);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
