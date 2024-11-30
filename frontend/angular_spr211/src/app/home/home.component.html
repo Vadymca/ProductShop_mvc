@@ -1,0 +1,109 @@
+<div class="container mt-5">
+  <h1 class="text-center mb-4">Product Management</h1>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Product Form (to add and edit a product) -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5>{{ selectedProduct.id ? 'Edit Product' : 'Add New Product' }}</h5>
+    </div>
+    <div class="card-body">
+      <form (ngSubmit)="selectedProduct.id ? updateProduct() : addProduct()">
+        <div class="mb-3">
+          <label for="productName" class="form-label">Product Name</label>
+          <input
+            type="text"
+            id="productName"
+            [(ngModel)]="selectedProduct.name"
+            name="name"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="productPrice" class="form-label">Price</label>
+          <input
+            type="number"
+            id="productPrice"
+            [(ngModel)]="selectedProduct.price"
+            name="price"
+            class="form-control"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="productDescription" class="form-label">Description</label>
+          <textarea
+            id="productDescription"
+            [(ngModel)]="selectedProduct.description"
+            name="description"
+            class="form-control"
+            rows="3"
+          ></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">
+          {{ selectedProduct.id ? 'Update Product' : 'Add Product' }}
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary ms-2"
+          *ngIf="selectedProduct.id"
+          (click)="cancelEdit()"
+        >
+          Cancel
+        </button>
+      </form>
+    </div>
+  </div>
+
+ <!-- Product List -->
+<div class="card">
+  <div class="card-header">
+    <h5>Product List</h5>
+  </div>
+  <div class="card-body">
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody *ngIf="products && products.length > 0">
+        <tr *ngFor="let product of products">
+          <td>{{ product.id }}</td>
+          <td>{{ product.name }}</td>
+          <td>{{ product.price | currency }}</td>
+          <td>{{ product.description }}</td>
+          <td>
+            <button
+              class="btn btn-sm btn-warning"
+              (click)="selectProduct(product)"
+            >
+              Edit
+            </button>
+            <button
+              class="btn btn-sm btn-danger ms-2"
+              (click)="deleteProduct(product.id)"
+            >
+              Delete
+            </button>
+          </td>
+        </tr>
+      </tbody>
+      <tbody *ngIf="products && products.length === 0">
+        <tr>
+          <td colspan="5" class="text-center">No products available</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
