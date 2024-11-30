@@ -24,6 +24,7 @@
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="/products/index">Products</a>
                     </li>
+                     
                 </ul>
                 <ul class="navbar-nav me-2 mb-2 mb-lg-0">
                     <li class="nav-item dropdown">
@@ -31,15 +32,21 @@
                         @{
                             if (User.Identity.IsAuthenticated)
                             {
-                                <a class="nav-link active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            @User.Identity.Name
-                            </a>
-                            <li class="nav-item">
-                                <form asp-action="Logout" asp-controller="User" method="post" class="mt-6">
-                                    <button type="submit" class="btn btn-danger ">Logout</button>
-                                </form>
-
-                            </li>
+                                <li class="nav-item">
+                                    <a class="nav-link active" asp-action="CreateRole" asp-controller="User">Create Role Product</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link active" asp-action="AssignRole" asp-controller="User">Assign Role Product</a>
+                                </li>
+                                    <a class="nav-link active" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        @User.Identity.Name
+                                    </a>
+                                <li class="nav-item">
+                                    <form asp-action="Logout" asp-controller="User" method="post" class="mt-6">
+                                        <button type="submit" class="btn btn-danger ">Logout</button>
+                                    </form>
+                                </li>
+                            
                             }
                             else
                             {

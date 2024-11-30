@@ -50,13 +50,13 @@ public class Program
         // CORS policy
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("AllowSpecificOrigin",
-                builder =>
-                {
-                    builder.WithOrigins("http://127.0.0.1:5500")
-                           .AllowAnyHeader()
-                           .AllowAnyMethod();
-                });
+            options.AddPolicy("AllowSpecificOrigin", builder =>
+            {
+                builder.WithOrigins("http://localhost:4200")
+                       .AllowAnyHeader()
+                       .AllowAnyMethod()
+                       .AllowCredentials();
+            });
         });
 
         // Authentication with Cookie and JWT
@@ -113,7 +113,7 @@ public class Program
         app.UseRouting();
 
         // Включите CORS перед вызовом UseAuthentication и UseAuthorization
-        app.UseCors("AllowAll");
+        app.UseCors("AllowSpecificOrigin");
         app.UseAuthentication();
         app.UseAuthorization();
 
