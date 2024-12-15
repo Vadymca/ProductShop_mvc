@@ -1,109 +1,138 @@
-<div class="container mt-5">
-  <h1 class="text-center mb-4">Product Management</h1>
+<div class="container">
+  <!-- Відображення стану завантаження -->
+  <div *ngIf="isLoading" class="loading">Loading products...</div>
 
-  <!-- Error Message -->
-  <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+  <!-- Відображення повідомлення про помилку -->
+  <div *ngIf="errorMessage" class="error-message">
     {{ errorMessage }}
   </div>
 
-  <!-- Product Form (to add and edit a product) -->
-  <div class="card mb-4">
-    <div class="card-header">
-      <h5>{{ selectedProduct.id ? 'Edit Product' : 'Add New Product' }}</h5>
-    </div>
-    <div class="card-body">
-      <form (ngSubmit)="selectedProduct.id ? updateProduct() : addProduct()">
-        <div class="mb-3">
-          <label for="productName" class="form-label">Product Name</label>
-          <input
-            type="text"
-            id="productName"
-            [(ngModel)]="selectedProduct.name"
-            name="name"
-            class="form-control"
-            required
-          />
-        </div>
-        <div class="mb-3">
-          <label for="productPrice" class="form-label">Price</label>
-          <input
-            type="number"
-            id="productPrice"
-            [(ngModel)]="selectedProduct.price"
-            name="price"
-            class="form-control"
-            required
-          />
-        </div>
-        <div class="mb-3">
-          <label for="productDescription" class="form-label">Description</label>
-          <textarea
-            id="productDescription"
-            [(ngModel)]="selectedProduct.description"
-            name="description"
-            class="form-control"
-            rows="3"
-          ></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">
-          {{ selectedProduct.id ? 'Update Product' : 'Add Product' }}
-        </button>
-        <button
-          type="button"
-          class="btn btn-secondary ms-2"
-          *ngIf="selectedProduct.id"
-          (click)="cancelEdit()"
-        >
-          Cancel
-        </button>
-      </form>
-    </div>
-  </div>
-
- <!-- Product List -->
-<div class="card">
-  <div class="card-header">
-    <h5>Product List</h5>
-  </div>
-  <div class="card-body">
-    <table class="table table-bordered">
+  <!-- Список продуктів -->
+  <div *ngIf="!isLoading && !errorMessage">
+    <h2>List of products</h2>
+    <table class="products-table">
       <thead>
         <tr>
-          <th>ID</th>
+          <th>#</th>
           <th>Name</th>
           <th>Price</th>
           <th>Description</th>
           <th>Actions</th>
         </tr>
       </thead>
-      <tbody *ngIf="products && products.length > 0">
-        <tr *ngFor="let product of products">
-          <td>{{ product.id }}</td>
+      <tbody>
+        <tr *ngFor="let product of products; let i = index">
+          <td>{{ i + 1 }}</td>
           <td>{{ product.name }}</td>
-          <td>{{ product.price | currency }}</td>
+          <td>{{ product.price | currency:'USD' }}</td>
           <td>{{ product.description }}</td>
           <td>
-            <button
-              class="btn btn-sm btn-warning"
-              (click)="selectProduct(product)"
-            >
-              Edit
-            </button>
-            <button
-              class="btn btn-sm btn-danger ms-2"
-              (click)="deleteProduct(product.id)"
-            >
-              Delete
-            </button>
+            <button class="edit-btn" (click)="selectProduct(product)">Edit</button>
+            <button class="delete-btn" (click)="deleteProduct(product.id)">Delete</button>
+            <button class="btn btn-primary" (click)="addToCart(product.id)">Add to Cart</button>
           </td>
-        </tr>
-      </tbody>
-      <tbody *ngIf="products && products.length === 0">
-        <tr>
-          <td colspan="5" class="text-center">No products available</td>
         </tr>
       </tbody>
     </table>
   </div>
+
+ <!-- Форма додавання продукту -->
+<div *ngIf="!selectedProduct" class="form-container mt-4">
+  <h2>Add New Product</h2>
+  <form (ngSubmit)="addProduct()">
+    <div class="form-group">
+      <label for="newName">Name:</label>
+      <input
+        id="newName"
+        type="text"
+        [(ngModel)]="newProduct.name"
+        name="newName"
+        required
+        placeholder="Enter product name"
+        class="form-control"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="newPrice">Price:</label>
+      <input
+        id="newPrice"
+        type="number"
+        [(ngModel)]="newProduct.price"
+        name="newPrice"
+        required
+        placeholder="Enter product price"
+        class="form-control"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="newDescription">Description:</label>
+      <textarea
+        id="newDescription"
+        [(ngModel)]="newProduct.description"
+        name="newDescription"
+        placeholder="Enter product description"
+        class="form-control"
+      ></textarea>
+    </div>
+
+    <div class="form-actions mt-3">
+      <button type="submit" class="btn btn-primary">Add Product</button>
+    </div>
+  </form>
 </div>
 
+<!-- Форма редагування продукту -->
+<div *ngIf="selectedProduct" class="form-container mt-4">
+  <h2>Edit Product</h2>
+  <form>
+    <div class="form-group">
+      <label for="editName">Name:</label>
+      <input
+        id="editName"
+        type="text"
+        [(ngModel)]="selectedProduct.name"
+        name="editName"
+        required
+        class="form-control"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="editPrice">Price:</label>
+      <input
+        id="editPrice"
+        type="number"
+        [(ngModel)]="selectedProduct.price"
+        name="editPrice"
+        required
+        class="form-control"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="editDescription">Description:</label>
+      <textarea
+        id="editDescription"
+        [(ngModel)]="selectedProduct.description"
+        name="editDescription"
+        class="form-control"
+      ></textarea>
+    </div>
+
+    <div class="form-actions mt-3">
+      <button
+        type="button"
+        class="btn btn-success"
+        (click)="updateProduct()"
+      >
+        Save
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="cancelEdit()">
+        Cancel
+      </button>
+    </div>
+  </form>
+</div>
+</div>

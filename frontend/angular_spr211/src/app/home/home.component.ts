@@ -3,124 +3,133 @@ import { ProductService } from '../services/product.service';
 import { Product } from '../models/Product';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { CartService } from '../services/cart.service';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule,],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
 })
-export class HomeComponent implements OnInit, OnDestroy {
-  products: Product[] = [];
-  selectedProduct: Product = new Product();
-  errorMessage: string = '';
-  isLoading: boolean = true;
-  private tokenSubscription: Subscription | null = null;
+export class HomeComponent implements OnInit {
+  products: Product[] = []; // Список продуктів
+  selectedProduct: Product | null = null; // Вибраний продукт для редагування
+  newProduct: Product = { id: 0, name: '', price: 0, description: '' }; // Продукт для додавання
+  isLoading: boolean = false; // Стан завантаження
+  errorMessage: string = ''; // Повідомлення про помилки
 
-  constructor(private productService: ProductService, private cdr: ChangeDetectorRef) {}
+  constructor(private productService: ProductService, private cartService: CartService) {}
 
   ngOnInit(): void {
-    // Subscribe to token changes and download products
-    this.tokenSubscription = this.productService.tokenSubject.subscribe({
-      next: (token) => {
-        if (token) {
-          this.loadProducts();
-        }
-      },
-      error: (error) => {
-        this.errorMessage = 'Ошибка при получении токена: ' + error.message;
-      },
-    });
+    this.loadProducts(); // Завантаження продуктів при ініціалізації
   }
 
-  ngOnDestroy(): void {
-    // Unsubscribing from a token subject when a component is destroyed
-    if (this.tokenSubscription) {
-      this.tokenSubscription.unsubscribe();
-    }
-  }
-
-  // Loading Products
+  // Завантаження продуктів
   loadProducts(): void {
     this.isLoading = true;
-  
     this.productService.getProducts().subscribe({
       next: (data: Product[]) => {
-        console.log('Products loaded:', data);
-        this.products = data; 
+        this.products = data;
         this.isLoading = false;
-        this.cdr.detectChanges();
       },
       error: (error) => {
-        this.errorMessage = 'Ошибка при загрузке продуктов: ' + error.message;
+        this.errorMessage = 'Error loading products: ' + error.message;
         this.isLoading = false;
       },
     });
   }
 
-  // Selecting a product to edit
-  selectProduct(product: Product | null) {
-    this.selectedProduct = product ? { ...product } : new Product();
+  // Вибір продукту для редагування
+  selectProduct(product: Product | null): void {
+    this.selectedProduct = product ? { ...product } : { id: 0, name: '', price: 0 , description: ''}; // Якщо продукт null, створюємо новий
   }
 
-  // Reset product selection
-  cancelEdit() {
-    this.selectedProduct = new Product(); 
+  // Скасування редагування
+  cancelEdit(): void {
+    this.selectedProduct = null;
   }
 
-  // Adding a new product
-  addProduct() {
-    if (this.selectedProduct) {
-      this.productService.createProduct(this.selectedProduct).subscribe({
-        next: (newProduct: Product) => {
-          this.products.push(newProduct); 
-          this.selectedProduct = new Product(); 
-          this.errorMessage = '';
+  // Додавання нового продукту
+  addProduct(): void {
+    if (
+      !this.newProduct.name || 
+      this.newProduct.name.trim() === '' || 
+      this.newProduct.price <= 0
+    ) {
+      this.errorMessage = 'Please fill in all fields before adding a product.';
+      return;
+    }
+
+    this.productService.createProduct(this.newProduct).subscribe({
+      next: (createdProduct: Product) => {
+        this.products.push(createdProduct);
+        this.newProduct = { id: 0, name: '', price: 0, description: '' }; // Очищення форми
+        this.errorMessage = ''; // Скидання повідомлення про помилку
+      },
+      error: (error) => {
+        this.errorMessage = 'Error adding product: ' + error.message;
+      },
+    });
+  }
+
+  // Оновлення продукту
+  updateProduct(): void {
+    if (this.selectedProduct && this.selectedProduct.id) {
+      this.productService.updateProduct(this.selectedProduct.id, this.selectedProduct).subscribe({
+        next: (updatedProduct: Product) => {
+          const index = this.products.findIndex((p) => p.id === updatedProduct.id);
+          if (index !== -1) {
+            this.products[index] = updatedProduct;
+          }
+          this.selectedProduct = null;
         },
         error: (error) => {
-          this.errorMessage = 'Error adding product: ' + error.message;
+          this.errorMessage = 'An error occurred while updating the product: ' + error.message;
         },
       });
     }
   }
 
-  // Product Update
-  updateProduct(): void {
-    if (!this.selectedProduct || !this.selectedProduct.id) {
-      this.errorMessage = 'Error: The selected product does not contain an ID.';
-      return;
-    }
-
-    this.productService.updateProduct(this.selectedProduct.id, this.selectedProduct).subscribe({
-      next: (updatedProduct: Product) => {
-        const index = this.products.findIndex((p) => p.id === this.selectedProduct!.id);
-        if (index !== -1) {
-          this.products[index] = { ...updatedProduct }; 
-        } else {
-          console.warn('A product with this ID was not found in the local list.');
-        }
-        this.selectedProduct = new Product(); 
-        this.errorMessage = '';
-      },
-      error: (error) => {
-        this.errorMessage = 'Error when updating product: ' + error.message;
-        console.error('Error:', error);
-      },
-    });
-  }
-
-  // Removing a product
-  deleteProduct(id: number) {
+  // Видалення продукту
+  deleteProduct(id: number): void {
     this.productService.deleteProduct(id).subscribe({
       next: () => {
-        this.products = this.products.filter((p) => p.id !== id); 
-        this.errorMessage = '';
+        this.products = this.products.filter((product) => product.id !== id);
       },
       error: (error) => {
-        this.errorMessage = 'Error uninstalling product: ' + error.message;
+        this.errorMessage = 'Error removing product: ' + error.message;
       },
     });
   }
+  // Добавлення продукту в кошик
+  addToCart(productId: number) {
+    // Показуємо користувачу вікно для введення кількості товару
+    const quantityInput = prompt('Enter the quantity of the product you want to add to the cart:', '1');
+    
+    // Перетворюємо введене значення на число
+    let quantity = parseInt(quantityInput || '1', 10);
+  
+    // Якщо введено некоректне значення або кількість менша за 1, використовуємо 1 за замовчуванням
+    if (isNaN(quantity) || quantity <= 0) {
+      quantity = 1;
+    }
+  
+    // Створюємо об'єкт товару
+    const cartItem = { productId, quantity };
+  
+    // Відправляємо запит на сервер
+    this.cartService.addToCart(cartItem).subscribe({
+      next: (response) => {
+        alert(response.Message || 'Product added to cart successfully!');
+        console.log('Cart updated:', response);
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorMessage = err.error?.Message || 'Failed to add product to cart.';
+      },
+    });
+  }
+  
 }

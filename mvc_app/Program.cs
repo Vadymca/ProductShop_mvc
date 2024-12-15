@@ -21,6 +21,10 @@ public class Program
         // Add service products DI container
         builder.Services.AddScoped<IServiceProducts, ServiceProducts>();
 
+        // Add Cart service DI container
+        builder.Services.AddScoped<CartService>();
+        builder.Services.AddScoped<OrderService>();
+
         // Configure the database context for products
         builder.Services.AddDbContext<ProductContext>(options =>
         {

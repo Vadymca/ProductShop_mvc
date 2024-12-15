@@ -1,113 +1,59 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, BehaviorSubject, of } from 'rxjs';
-import { switchMap, catchError } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
 import { Product } from '../models/Product';
-import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductService {
-  public tokenSubject: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
-  private url: string = 'https://localhost:7193/api/apiproducts';
+  private apiUrl = 'https://localhost:7193/api/apiproducts';
+  tokenSubject = new Subject<string | null>();
 
-  constructor(private http: HttpClient, private authService: AuthService) {
-    this.initToken();
+  constructor(private http: HttpClient) {}
+
+  // Отримання токена з localStorage
+  getToken(): string | null {
+    return localStorage.getItem('authToken');
   }
 
-  // Token initialization
-  private initToken(): void {
-    const user = { email: 'vadimancuta@gmail.com', password: '111111' };
-    this.authService.getToken(user).pipe(
-      catchError((error) => {
-        console.error('Error receiving token:', error);
-        return of(null);  
-      })
-    ).subscribe({
-      next: (data: { token: string } | null) => {
-        if (data?.token) {
-          this.tokenSubject.next(data.token);  
-        } else {
-          console.error('Token was not received');
-        }
-      },
-    });
-  }
-
-  // Retrieving headers with authorization
-  private getHeaders(): Observable<HttpHeaders> {
-    return this.tokenSubject.pipe(
-      switchMap((token) => {
-        if (!token) {
-          throw new Error('Token not available');
-        }
-        return of(new HttpHeaders({ Authorization: `Bearer ${token}` }));
-      })
-    );
-  }
-
-  // Get products with token 
+  // Метод для отримання продуктів
   getProducts(): Observable<Product[]> {
-    return this.tokenSubject.pipe(
-      switchMap((token) => {
-        if (!token) {
-        
-          return of([]);  
-        }
-        return this.getHeaders().pipe(
-          switchMap((headers) => {
-            return this.http.get<Product[]>(this.url, { headers }).pipe(
-              catchError((error) => {
-                console.error('Error loading products:', error);
-                return of([]);  
-              })
-            );
-          })
-        );
-      })
-    );
+    const token = this.getToken();
+    const headers = token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : undefined;
+
+    return this.http.get<Product[]>(this.apiUrl, { headers });
   }
 
-  // Create
-  createProduct(product: Product): Observable<any> {
-    return this.getHeaders().pipe(
-      switchMap((headers) => {
-        return this.http.post(this.url, product, { headers }).pipe(
-          catchError((error) => {
-            console.error('Error creating product:', error);
-            return of(null);  
-          })
-        );
-      })
-    );
+  // Додати продукт
+  createProduct(product: Product): Observable<Product> {
+    const token = this.getToken();
+    const headers = token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : undefined;
+
+    return this.http.post<Product>(this.apiUrl, product, { headers });
   }
 
-  // Update
-  updateProduct(id: number, product: Product): Observable<any> {
-    return this.getHeaders().pipe(
-      switchMap((headers) => {
-        return this.http.put(`${this.url}/${id}`, product, { headers }).pipe(
-          catchError((error) => {
-            console.error('Error while updating product:', error);
-            return of(null);  
-          })
-        );
-      })
-    );
+  // Оновити продукт
+  updateProduct(id: number, product: Product): Observable<Product> {
+    const token = this.getToken();
+    const headers = token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : undefined;
+
+    return this.http.put<Product>(`${this.apiUrl}/${id}`, product, { headers });
   }
 
-  // Delete
-  deleteProduct(id: number): Observable<any> {
-    return this.getHeaders().pipe(
-      switchMap((headers) => {
-        return this.http.delete(`${this.url}/${id}`, { headers }).pipe(
-          catchError((error) => {
-            console.error('Error uninstalling product:', error);
-            return of(null);  
-          })
-        );
-      })
-    );
+  // Видалити продукт
+  deleteProduct(id: number): Observable<void> {
+    const token = this.getToken();
+    const headers = token
+      ? new HttpHeaders({ Authorization: `Bearer ${token}` })
+      : undefined;
+
+    return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers });
   }
 }

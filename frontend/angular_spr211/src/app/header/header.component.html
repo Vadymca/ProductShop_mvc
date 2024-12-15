@@ -1,0 +1,17 @@
+<header>
+    <nav class="navbar">
+      <div class="container">
+        <a href="/" class="logo">Product-Shop</a>
+        <ul class="nav-links">
+          <li> <button *ngIf="isAuthenticated" class="btn btn-danger" (click)="onLogout()">
+            Logout
+          </button></li>
+          <li><a routerLink="/home" *ngIf="isAuthenticated" class="btn btn-info" >Home</a></li>
+          <li><a routerLink="/login" *ngIf="!isAuthenticated" class="btn btn-success">Login</a></li>
+          <li><a routerLink="/register" *ngIf="!isAuthenticated" class="btn btn-primary">Register</a></li>
+          <li><a routerLink="/cart" *ngIf="isAuthenticated" class="btn btn-warning">Cart</a></li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+  
